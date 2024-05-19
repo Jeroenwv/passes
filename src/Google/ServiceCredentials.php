@@ -17,7 +17,18 @@ class ServiceCredentials extends DataTransferObject
             throw new InvalidArgumentException(sprintf('Service account configuration file not found: %s', $path));
         }
 
-        $config = json_decode(file_get_contents($path), true);
+        $json = file_get_contents($path);
+
+        return static::parseFromJSON($json);
+    }
+
+    public static function parseFromJSON(string $json): static
+    {
+        $config = json_decode($json, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new InvalidArgumentException('Invalid JSON provided: '.json_last_error_msg());
+        }
 
         return new static([
             'client_id' => $config['client_id'],
